@@ -10,7 +10,8 @@
   "license": "ISC",
   "packageManager": "pnpm@10.17.0",
   "repository": {
-    "type": "git"
+    "type": "git",
+    "url": "https://github.com/mendgart444/typejack-vscode-extension"
   },
   "dependencies": {
     "vscode-languageserver": "9.0.1",

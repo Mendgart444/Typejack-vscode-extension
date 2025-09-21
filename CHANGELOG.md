@@ -1,9 +1,5 @@
 # Change Log
 
-All notable changes to the "typejack-support" extension will be documented in this file.
+## Unreleased
 
-Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
-
-## [Unreleased]
-
-- Initial release
+- there is no release of this extension

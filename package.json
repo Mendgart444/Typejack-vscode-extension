@@ -8,6 +8,10 @@
     "compile:client": "tsc -p client/tsconfig.json",
     "compile": "pnpm run compile:server && pnpm run compile:client"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mendgart444/typejack-vscode-extension"
+  },
   "engines": {
     "vscode": "^1.22.0"
   },
