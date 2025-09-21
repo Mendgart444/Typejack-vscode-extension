@@ -1,0 +1,33 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "Typejack",
+  "patterns": [
+    { "include": "#keywords" },
+    { "include": "#strings" },
+    { "include": "#configs" }
+  ],
+  "repository": {
+    "keywords": {
+      "patterns": [{
+        "name": "keyword.control.typejack",
+        "match": "\\b(project)\\b"
+      }]
+    },
+    "strings": {
+      "name": "string.quoted.double.typejack",
+      "begin": "\"",
+      "end": "\"",
+      "patterns": [
+        {
+          "name": "constant.character.escape.typejack",
+          "match": "\\\\."
+        }
+      ]
+    },
+    "configs": {
+      "name": "variable.name.typejack",
+      "match": "\\b(name|out_dir|entry)\\b"
+    }
+  },
+  "scopeName": "source.toml.typejack"
+}

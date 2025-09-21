@@ -1,0 +1,23 @@
+{
+  "name": "typejack-support-client",
+  "version": "1.0.0",
+  "description": "",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+    "packageManager": "pnpm@10.16.1",
+  "repository": {
+    "type": "git"
+  },
+  "engines": {
+    "vscode": "^1.22.0"
+  },
+  "dependencies": {
+    "glob": "11.0.3",
+    "vscode-languageclient": "9.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.5.2",
+    "@types/vscode": "1.104.0"
+  }
+}
