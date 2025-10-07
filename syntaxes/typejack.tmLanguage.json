@@ -10,7 +10,7 @@
     "keywords": {
       "patterns": [{
         "name": "keyword.control.typejack",
-        "match": "\\b(project)\\b"
+        "match": "\\b(project|build)\\b"
       }]
     },
     "strings": {
@@ -26,7 +26,7 @@
     },
     "configs": {
       "name": "variable.name.typejack",
-      "match": "\\b(name|out_dir|entry)\\b"
+      "match": "\\b(name|out_dir|entry|version)\\b"
     }
   },
   "scopeName": "source.toml.typejack"

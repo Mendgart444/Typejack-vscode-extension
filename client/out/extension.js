@@ -114,7 +114,7 @@ function activate(context) {
     const clientOptions = {
         // Nur für die Datei typejack.toml aktiv
         documentSelector: [
-            { scheme: 'file', language: 'toml', pattern: '**/typejack.toml' }
+            { scheme: 'file', language: 'toml', pattern: '**/Typejack.toml' }
         ],
         synchronize: {
             fileEvents: vscode_1.workspace.createFileSystemWatcher('**/.clientrc')

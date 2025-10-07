@@ -1,12 +1,10 @@
 {
   "name": "typejack-support",
   "displayName": "Typejack Support",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "main": "./client/out/extension.js",
   "scripts": {
-    "compile:server": "tsc -p server/tsconfig.json",
-    "compile:client": "tsc -p client/tsconfig.json",
-    "compile": "pnpm run compile:server && pnpm run compile:client"
+    "compile": "tsc -p client/tsconfig.json"
   },
   "repository": {
     "type": "git",
@@ -17,10 +15,6 @@
   },
   "categories": [
     "Programming Languages"
-  ],
-  "activationEvents": [
-    "onLanguage:toml",
-    "onFileSystem:file"
   ],
   "contributes": {
     "languages": [
@@ -34,6 +28,17 @@
           ".toml"
         ],
         "configuration": "./language-configuration.json"
+      },
+      {
+        "id": "typescript",
+        "aliases": [
+          "TypeScript"
+        ],
+        "extensions": [
+          ".ts",
+          ".tsx"
+        ],
+        "configuration": "./language-configuration.json"
       }
     ],
     "grammars": [
@@ -41,6 +46,12 @@
         "language": "toml",
         "scopeName": "source.toml.typejack",
         "path": "./syntaxes/typejack.tmLanguage.json"
+      }
+    ],
+    "snippets": [
+      {
+        "language": "toml",
+        "path": "./snippets/typejack.toml.json"
       }
     ]
   }

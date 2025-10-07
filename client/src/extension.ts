@@ -1,4 +1,3 @@
-import * as path from 'path';
 import { workspace, ExtensionContext, window, StatusBarAlignment, commands, ProgressLocation } from 'vscode';
 import { exec } from 'child_process';
 
@@ -6,11 +5,14 @@ import {
 	LanguageClient,
 	LanguageClientOptions,
 	ServerOptions,
-	TransportKind
 } from 'vscode-languageclient/node';
+
+// begining of the code.
 
 let client: LanguageClient;
 
+
+// get the path to the typejack executable
 function getTypejackPath(): string {
 	const configPath = workspace.getConfiguration('typejack').get<string>('path');
 	if (configPath && configPath.trim() !== '') {
@@ -19,7 +21,7 @@ function getTypejackPath(): string {
 
 	return 'typejack';
 }
-
+// check if typejack is installed and show the build button if it is
 function isTypejackInstalled(): Promise<boolean> {
 	const typejackPath = getTypejackPath();
 	return new Promise((resolve) => {
@@ -29,14 +31,21 @@ function isTypejackInstalled(): Promise<boolean> {
 	});
 }
 
+function getLanguageServerPath(): string {
+	const configPath = workspace.getConfiguration('typejack').get<string>('serverPath');
+	if (configPath && configPath.trim() !== '') {
+        return configPath;
+    }
+
+	return 'typejack-ls';
+}
+
+
 export function activate(context: ExtensionContext) {
+	// activate server for toml files
 	const outputChannel = window.createOutputChannel("Typejack Support");
 	outputChannel.appendLine("Starting server...");
 
-	// The server is implemented in node
-	const serverModule = context.asAbsolutePath(
-		path.join('server', 'out', 'server.js')
-	);
 
 	isTypejackInstalled().then(installed => {
         if (installed) {
@@ -81,33 +90,35 @@ export function activate(context: ExtensionContext) {
     });
     context.subscriptions.push(buildCommand);
 
-	// If the extension is launched in debug mode then the debug server options are used
-	// Otherwise the run options are used
+	const serverExe = getLanguageServerPath();
+
 	const serverOptions: ServerOptions = {
-		run: { module: serverModule, transport: TransportKind.ipc },
-		debug: {
-			module: serverModule,
-			transport: TransportKind.ipc,
-		}
-	};
+        // Konfiguration für den normalen Start
+        run: {
+            command: serverExe,
+            args: [],
+            // Optionale Umgebungsvariablen oder CWD können hier hinzugefügt werden:
+            // options: { cwd: path.join(__dirname, '..') }
+        },
+        // Konfiguration für den Debug-Start (oft identisch für externe Binaries)
+        debug: {
+            command: serverExe,
+            args: []
+        }
+    };
 
-	// Options to control the language client
 	const clientOptions: LanguageClientOptions = {
-		// Nur für die Datei typejack.toml aktiv
-		documentSelector: [
-			{ scheme: 'file', language: 'toml', pattern: '**/typejack.toml' }
-		],
+		documentSelector: [{ scheme: 'file', language: 'typescript' }],
 		synchronize: {
-			fileEvents: workspace.createFileSystemWatcher('**/.clientrc')
+			fileEvents: workspace.createFileSystemWatcher('**/*.ts')
 		}
-	};
+	}
 
-	// Create the language client and start the client.
-	client = new LanguageClient(
-		'languageServerExample',
-		'Language Server Example',
+	client = new LanguageClient (
+		'typejack-support',
+		'Typejack Support',
 		serverOptions,
-		clientOptions
+        clientOptions
 	);
 
 	// Start the client. This will also launch the server
