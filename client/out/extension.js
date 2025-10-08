@@ -1,51 +1,27 @@
 "use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || (function () {
-    var ownKeys = function(o) {
-        ownKeys = Object.getOwnPropertyNames || function (o) {
-            var ar = [];
-            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
-            return ar;
-        };
-        return ownKeys(o);
-    };
-    return function (mod) {
-        if (mod && mod.__esModule) return mod;
-        var result = {};
-        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
-        __setModuleDefault(result, mod);
-        return result;
-    };
-})();
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.activate = activate;
 exports.deactivate = deactivate;
-const path = __importStar(require("path"));
 const vscode_1 = require("vscode");
 const child_process_1 = require("child_process");
 const node_1 = require("vscode-languageclient/node");
 let client;
+// ------------------------------------------------------------
+// Hilfsfunktionen
+// ------------------------------------------------------------
 function getTypejackPath() {
     const configPath = vscode_1.workspace.getConfiguration('typejack').get('path');
     if (configPath && configPath.trim() !== '') {
         return configPath;
     }
-    return 'typejack';
+    return 'typejack'; // fallback: im PATH
+}
+function getLanguageServerPath() {
+    const configPath = vscode_1.workspace.getConfiguration('typejack').get('serverPath');
+    if (configPath && configPath.trim() !== '') {
+        return configPath;
+    }
+    return 'typejack-ls'; // fallback
 }
 function isTypejackInstalled() {
     const typejackPath = getTypejackPath();
@@ -55,22 +31,16 @@ function isTypejackInstalled() {
         });
     });
 }
+// ------------------------------------------------------------
+// Aktivierung der Extension
+// ------------------------------------------------------------
 function activate(context) {
-    const outputChannel = vscode_1.window.createOutputChannel("Typejack Support");
-    outputChannel.appendLine("Starting server...");
-    // The server is implemented in node
-    const serverModule = context.asAbsolutePath(path.join('server', 'out', 'server.js'));
-    isTypejackInstalled().then(installed => {
-        if (installed) {
-            buildButton.show();
-        }
-        else {
-            vscode_1.window.showWarningMessage('Typejack is not installed or not found in PATH. Set "typejack.path" in your settings if needed.');
-        }
-    });
+    const outputChannel = vscode_1.window.createOutputChannel('Typejack Support');
+    outputChannel.appendLine('Starting Typejack Language Server...');
+    // StatusBar Items
     const statusBarItem = vscode_1.window.createStatusBarItem(vscode_1.StatusBarAlignment.Left, 100);
-    statusBarItem.text = 'Typejack is active';
-    statusBarItem.tooltip = 'Typejack Support is running';
+    statusBarItem.text = '$(rocket) Typejack active';
+    statusBarItem.tooltip = 'Typejack LSP is running';
     statusBarItem.show();
     context.subscriptions.push(statusBarItem);
     const buildButton = vscode_1.window.createStatusBarItem(vscode_1.StatusBarAlignment.Left, 99);
@@ -79,16 +49,17 @@ function activate(context) {
     buildButton.command = 'typejack.build';
     buildButton.hide();
     context.subscriptions.push(buildButton);
+    // Build Command
     const buildCommand = vscode_1.commands.registerCommand('typejack.build', async () => {
         const typejackPath = getTypejackPath();
         const cwd = vscode_1.workspace.workspaceFolders?.[0]?.uri.fsPath || process.cwd();
-        vscode_1.window.withProgress({
+        await vscode_1.window.withProgress({
             location: vscode_1.ProgressLocation.Notification,
             title: 'Typejack Build',
             cancellable: false
         }, async () => {
             return new Promise((resolve) => {
-                (0, child_process_1.exec)(`"${typejackPath}" build`, { cwd }, (error, stdout, stderr) => {
+                (0, child_process_1.exec)(`"${typejackPath}" build`, { cwd }, (error, _stdout, stderr) => {
                     if (error) {
                         vscode_1.window.showErrorMessage('Typejack build failed: ' + stderr);
                     }
@@ -101,35 +72,37 @@ function activate(context) {
         });
     });
     context.subscriptions.push(buildCommand);
-    // If the extension is launched in debug mode then the debug server options are used
-    // Otherwise the run options are used
+    // Show build button only if Typejack is installed
+    isTypejackInstalled().then((installed) => {
+        if (installed) {
+            buildButton.show();
+        }
+        else {
+            vscode_1.window.showWarningMessage('Typejack not found. Set `typejack.path` in settings if needed.');
+        }
+    });
+    // ------------------------------------------------------------
+    // LSP-Client Start
+    // ------------------------------------------------------------
+    const serverExe = getLanguageServerPath();
     const serverOptions = {
-        run: { module: serverModule, transport: node_1.TransportKind.ipc },
-        debug: {
-            module: serverModule,
-            transport: node_1.TransportKind.ipc,
-        }
+        run: { command: serverExe, args: [] },
+        debug: { command: serverExe, args: [] }
     };
-    // Options to control the language client
     const clientOptions = {
-        // Nur für die Datei typejack.toml aktiv
-        documentSelector: [
-            { scheme: 'file', language: 'toml', pattern: '**/Typejack.toml' }
-        ],
+        documentSelector: [{ scheme: 'file', language: 'typescript' }],
         synchronize: {
-            fileEvents: vscode_1.workspace.createFileSystemWatcher('**/.clientrc')
-        }
+            fileEvents: vscode_1.workspace.createFileSystemWatcher('**/*.ts')
+        },
+        outputChannel, // 🔹 loggt Serverausgaben in dein Panel
     };
-    // Create the language client and start the client.
-    client = new node_1.LanguageClient('languageServerExample', 'Language Server Example', serverOptions, clientOptions);
-    // Start the client. This will also launch the server
+    client = new node_1.LanguageClient('typejack-support', 'Typejack Support', serverOptions, clientOptions);
     client.start();
-    outputChannel.appendLine("Server started!");
+    outputChannel.appendLine('Typejack Language Server started!');
 }
 function deactivate() {
-    if (!client) {
+    if (!client)
         return undefined;
-    }
     return client.stop();
 }
 //# sourceMappingURL=extension.js.map

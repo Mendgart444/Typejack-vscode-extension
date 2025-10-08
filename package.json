@@ -19,17 +19,6 @@
   "contributes": {
     "languages": [
       {
-        "id": "toml",
-        "aliases": [
-          "Toml",
-          "toml"
-        ],
-        "extensions": [
-          ".toml"
-        ],
-        "configuration": "./language-configuration.json"
-      },
-      {
         "id": "typescript",
         "aliases": [
           "TypeScript"
@@ -41,17 +30,10 @@
         "configuration": "./language-configuration.json"
       }
     ],
-    "grammars": [
-      {
-        "language": "toml",
-        "scopeName": "source.toml.typejack",
-        "path": "./syntaxes/typejack.tmLanguage.json"
-      }
-    ],
     "snippets": [
       {
-        "language": "toml",
-        "path": "./snippets/typejack.toml.json"
+        "language": "typescript",
+        "path": "./snippets/snippets.json"
       }
     ]
   }

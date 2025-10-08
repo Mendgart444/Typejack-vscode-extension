@@ -1,0 +1,45 @@
+{
+  "Function": {
+    "prefix": "func",
+    "body": [
+      "function ${1:name}(${2:args}): ${3:void} {",
+      "\t$0",
+      "}"
+    ],
+    "description": "Creates a function",
+    "scope": "typescript"
+  },
+
+  "Class": {
+    "prefix": "class",
+    "body": [
+      "class ${1:ClassName} {",
+      "\tconstructor(${2:args}) {",
+      "\t\t$0",
+      "\t}",
+      "}"
+    ],
+    "description": "Creates a class",
+    "scope": "typescript"
+  },
+
+  "Interface": {
+    "prefix": "interface",
+    "body": [
+      "interface ${1:InterfaceName} {",
+      "\t${2:prop}: ${3:type};",
+      "}"
+    ],
+    "description": "Creates an interface",
+    "scope": "typescript"
+  },
+
+  "Log": {
+    "prefix": "log",
+    "body": [
+      "console.log(${1:message});"
+    ],
+    "description": "Simple console.log statement",
+    "scope": "typescript"
+  }
+}
